@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+import "ephemus.proto";
+
+// Client messages from the controlling device to the target stroker
+
+message StrokerActionCommand {
+    enum Command {
+        STOP = 0;
+        HOME = 1;
+        ENABLE = 2;
+        DISABLE = 3;
+    }
+    Command command = 1;
+}
+
+message StrokerIsometricMoveCommand {
+    uint32 axis = 1;
+    uint32 acceleration = 2;
+    uint32 speed = 3;
+    sint32 distance = 4;
+}
+
+message StrokerNonIsometricMoveCommand {
+}
+
+message StrokerAxisQuery {
+    uint32 axis = 1;
+}
+
+message StrokerDeviceQuery {
+}
+
+message StrokerClientMessage {
+    uint32 message_id = 1;
+    oneof client_message {
+        EphemusPing ping = 2;
+        StrokerDeviceQuery device_query = 3;
+        StrokerAxisQuery axis_query = 4;
+        StrokerActionCommand action = 5;
+        StrokerIsometricMoveCommand isometric_move = 6;
+        StrokerNonIsometricMoveCommand nonisometric_move = 7;
+    }
+}
+
+
+// Device response messages
+
+message StrokerAxisInfo {
+    uint32 axis = 1;
+    uint32 position = 2;
+    uint32 max_position = 3;
+}
+
+message StrokerDeviceInfo {
+    uint32 capabilities = 1;
+    uint32 n_axes = 2;
+}
+
+message StrokerActionComplete {
+}
+
+message StrokerMoveComplete {
+    uint32 axis = 1;
+    uint32 position = 2;
+}
+
+message StrokerDeviceMessage {
+    uint32 message_id = 1;
+    oneof device_message {
+        EphemusPing ping = 2;
+        EphemusDeviceError error = 3;
+        StrokerDeviceInfo device_info = 4;
+        StrokerAxisInfo axis_info = 5;
+        StrokerActionComplete action_complete = 6;
+        StrokerMoveComplete move_complete = 7;
+    }
+}
