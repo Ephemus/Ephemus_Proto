@@ -4,16 +4,6 @@ message EphemusClientHello {
     uint32 hello_id = 1;
 }
 
-message EphemusDeviceError {
-    enum ErrorType {
-        UNSPECIFIED = 0;
-        ERRORED = 1;
-        BAD_INPUT = 2;
-        FAILED = 3;
-    }
-    ErrorType error_type = 1;
-}
-
 message EphemusDeviceHello {
     uint32 hello_id = 1;
     uint32 device_id = 2;
@@ -21,6 +11,21 @@ message EphemusDeviceHello {
     float firmware = 4;
 }
 
+message EphemusError {
+    enum ErrorType {
+        PB_DECODE = 0;          // failed to decode a transmitted packet
+        IN_ERROR = 1;           // device is in error state
+        PROTOCOL_ERROR = 2;     // device is in the wrong state for the command
+        BAD_INPUT = 3;          // unknown command
+        FAILED = 4;             // other/unknown errors
+    }
+    ErrorType error_type = 1;
+}
+
 message EphemusPing {
     bool pong = 1;
+}
+
+message EphemusReset {
+    bool bootloader = 0;
 }
