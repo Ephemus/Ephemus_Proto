@@ -2,26 +2,46 @@ syntax = "proto3";
 
 import "ephemus.proto";
 
-// Client messages from the controlling device to the target stroker
+
+enum StrokerCommandType {
+    STOP = 0;
+    HOME = 1;
+    ENABLE = 2;
+    DISABLE = 3;
+}
+
+
+// client message envelope
+message StrokerClientMessage {
+    uint32 message_id = 1;
+    oneof client_message {
+        EphemusPing ping = 2;
+        EphemusChangeDialect change_dialect = 3;
+        StrokerDeviceQuery device_query = 4;
+        StrokerAxisQuery axis_query = 5;
+        StrokerActionCommand action_command = 6;
+        StrokerMoveCommand move_command = 7;
+    }
+}
+
+// device message envelope
+message StrokerDeviceMessage {
+    uint32 message_id = 1;
+    oneof device_message {
+        EphemusPong pong = 2;
+        EphemusDialectChanged dialect_changed = 3;
+        EphemusError error = 4;
+        StrokerDeviceInfo device_info = 5;
+        StrokerAxisInfo axis_info = 6;
+        StrokerActionComplete action_complete = 7;
+        StrokerMoveComplete move_complete = 8;
+    }
+}
+
+// client messages
 
 message StrokerActionCommand {
-    enum Command {
-        STOP = 0;
-        HOME = 1;
-        ENABLE = 2;
-        DISABLE = 3;
-    }
-    Command command = 1;
-}
-
-message StrokerIsometricMoveCommand {
-    uint32 axis = 1;
-    uint32 acceleration = 2;
-    uint32 speed = 3;
-    sint32 distance = 4;
-}
-
-message StrokerNonIsometricMoveCommand {
+    StrokerCommandType command = 1;
 }
 
 message StrokerAxisQuery {
@@ -31,49 +51,36 @@ message StrokerAxisQuery {
 message StrokerDeviceQuery {
 }
 
-message StrokerClientMessage {
-    uint32 message_id = 1;
-    oneof client_message {
-        EphemusPing ping = 2;
-        EphemusReset reset = 3;
-        StrokerDeviceQuery device_query = 4;
-        StrokerAxisQuery axis_query = 5;
-        StrokerActionCommand action = 6;
-        StrokerIsometricMoveCommand isometric_move = 7;
-        StrokerNonIsometricMoveCommand nonisometric_move = 8;
-    }
+message StrokerMoveCommand {
+    uint32 axis = 1;
+    uint32 target = 2;
+    uint32 speed = 3;
+    uint32 acceleration = 4;
+    optional uint32 deceleration = 5;
 }
 
 
-// Device response messages
+// device messages
 
 message StrokerAxisInfo {
     uint32 axis = 1;
     uint32 position = 2;
     uint32 max_position = 3;
+    uint32 max_speed = 4;
 }
 
 message StrokerDeviceInfo {
     uint32 capabilities = 1;
     uint32 n_axes = 2;
+    bool is_enabled = 3;
+    bool is_homed = 4;
 }
 
 message StrokerActionComplete {
+    bool success = 1;
 }
 
 message StrokerMoveComplete {
     uint32 axis = 1;
     uint32 position = 2;
-}
-
-message StrokerDeviceMessage {
-    uint32 message_id = 1;
-    oneof device_message {
-        EphemusPing ping = 2;
-        EphemusError error = 3;
-        StrokerDeviceInfo device_info = 4;
-        StrokerAxisInfo axis_info = 5;
-        StrokerActionComplete action_complete = 6;
-        StrokerMoveComplete move_complete = 7;
-    }
 }

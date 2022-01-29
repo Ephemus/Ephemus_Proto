@@ -1,31 +1,74 @@
 syntax = "proto3";
 
-message EphemusClientHello {
-    uint32 hello_id = 1;
+enum EphemusDialectType {
+    EPHEMUS = 0;
+    STROKER = 1;
 }
 
-message EphemusDeviceHello {
-    uint32 hello_id = 1;
-    uint32 device_id = 2;
-    uint32 capabilities = 3;
-    float firmware = 4;
+enum EphemusErrorType {
+    PB_DECODE = 0;          // failed to decode a transmitted packet
+    IN_ERROR = 1;           // device is in error state
+    PROTOCOL_ERROR = 2;     // device is in the wrong state for the command
+    BAD_REQUEST = 3;        // request violates device capability
+    BAD_INPUT = 4;          // unknown command
+    FAILED = 5;             // other/unknown errors
 }
 
-message EphemusError {
-    enum ErrorType {
-        PB_DECODE = 0;          // failed to decode a transmitted packet
-        IN_ERROR = 1;           // device is in error state
-        PROTOCOL_ERROR = 2;     // device is in the wrong state for the command
-        BAD_INPUT = 3;          // unknown command
-        FAILED = 4;             // other/unknown errors
+
+// client message envelope
+message EphemusClientMessage {
+    uint32 message_id = 1;
+    oneof client_message {
+        EphemusPing ping = 2;
+        EphemusChangeDialect change_dialect = 3;
+        EphemusClientHello client_hello = 4;
+        EphemusReset reset = 5;
     }
-    ErrorType error_type = 1;
+}
+
+// device message envelope
+message EphemusDeviceMessage {
+    uint32 message_id = 1;
+    oneof device_message {
+        EphemusPong pong = 2;
+        EphemusDialectChanged dialect_changed = 3;
+        EphemusError error = 4;
+        EphemusDeviceHello device_hello = 5;
+    }
+}
+
+// client messages
+
+message EphemusClientHello {
+}
+
+message EphemusChangeDialect {
+    EphemusDialectType dialect = 1;
 }
 
 message EphemusPing {
-    bool pong = 1;
 }
 
 message EphemusReset {
     bool bootloader = 1;
+}
+
+// device messages
+
+message EphemusDeviceHello {
+    uint32 device_id = 1;
+    uint32 dialects = 2;
+    uint32 firmware = 3;
+    bool in_error = 4;
+}
+
+message EphemusError {
+    EphemusErrorType error_type = 1;
+}
+
+message EphemusPong {
+}
+
+message EphemusDialectChanged {
+    EphemusDialectType dialect = 1;
 }
